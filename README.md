@@ -71,12 +71,12 @@
 
 ## 2. 팀원 소개
 
-| 구분 | 역할 | 담당 영역 |
-| --- | --- | --- |
-| 팀장 | Leg Tracking 및 Fall Detection | `aftr_tracking`, `aftr_fall_detection` |
-| 팀원1 | Path Planning 및 Autonomous Navigation Support | `aftr_path_manager`, `aftr_status_led` |
-| 팀원2 | Firmware 및 System Integration | `aftr_audio`, `aftr_bringup`, `aftr_description`, `aftr_gui`, `aftr_hardware`, `aftr_mode_manager`, `aftr_navigation`, `aftr_slam`, `aftr_teleop` |
-| 팀원3 | Mechanical Design | 기구부 설계 및 CAD |
+| 구분 | 역할 |
+| --- | --- |
+| 팀장 | Leg Tracking 및 Fall Detection |
+| 팀원1 | Path Planning 및 Autonomous Navigation Support |
+| 팀원2 | Firmware 및 System Integration |
+| 팀원3 | Mechanical Design |
 
 ---
 
