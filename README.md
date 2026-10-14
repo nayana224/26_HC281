@@ -127,7 +127,9 @@ GUI에서 모드 선택, 경로 저장 설정, 주행 명령, 로봇 상태 및 
 
 ## 4. 작품 소개영상
 
-**소개영상 등록 예정입니다.** 현재 확인된 공개 영상 URL이 없어 임의의 링크나 썸네일을 삽입하지 않았습니다. 영상 공개 후 이 항목에 유튜브 썸네일과 시청 링크를 연결할 예정입니다.
+[![자율주행 기반 물류 카트 견인 로봇 — 작품 소개영상](https://img.youtube.com/vi/bFqfijlAvS0/hqdefault.jpg)](https://youtu.be/bFqfijlAvS0)
+
+[YouTube에서 작품 소개영상 보기](https://youtu.be/bFqfijlAvS0)
 
 ---
 
