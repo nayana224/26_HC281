@@ -1,6 +1,6 @@
 # 시스템 구조
 
-Autonomous Following and Towing Robot은 ROS 2 Humble 기반으로 작업자 추종, 경로 기록, Mapping, Localization 및 저장 경로 재생을 수행합니다.
+자율주행 기반 물류 카트 견인 로봇(AFTR)은 ROS 2 Humble 기반으로 작업자 추종, 경로 기록, Mapping, Localization 및 저장 경로 재생을 수행합니다.
 
 ## 전체 구조
 

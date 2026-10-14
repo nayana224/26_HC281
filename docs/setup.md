@@ -1,6 +1,6 @@
 # 설치 및 실행
 
-이 문서는 Autonomous Following and Towing Robot을 Laptop 개발 환경 또는 Jetson Orin Nano 배포 환경에서 준비하고 실행하는 방법을 설명합니다.
+이 문서는 자율주행 기반 물류 카트 견인 로봇(AFTR)을 Laptop 개발 환경 또는 Jetson Orin Nano 배포 환경에서 준비하고 실행하는 방법을 설명합니다.
 
 ## 1. Workspace 구성
 

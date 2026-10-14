@@ -1,4 +1,4 @@
-# Autonomous Following and Towing Robot (AFTR)
+# 자율주행 기반 물류 카트 견인 로봇
 
 > **작업자 추종·경로 기록·자율주행을 통합한 ROS 2 기반 견인 로봇**
 
@@ -12,7 +12,8 @@
 
 ### 1-1. 프로젝트 소개
 
-- **프로젝트명:** Autonomous Following and Towing Robot (AFTR)
+- **프로젝트명:** 자율주행 기반 물류 카트 견인 로봇
+- **영문명:** Autonomous Following and Towing Robot (AFTR)
 - **프로젝트 정의:** LiDAR 기반으로 작업자를 추종하면서 경로와 지도를 기록하고, 저장된 정보를 활용하여 자율주행과 복귀 주행을 수행하는 ROS 2 기반 이동형 견인 로봇
 
 <p align="center">
