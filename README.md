@@ -130,51 +130,92 @@ GUI에서 모드 선택, 경로 저장 설정, 주행 명령, 로봇 상태 및 
 
 ## 5. 핵심 소스코드
 
-### 5-1. 경로 재생 이벤트 판정
+프로젝트의 주요 기능을 **자율주행 경로 보간**, **Human Tracking**, **Motor Driver 제어**의 세 분야로 구분해 소개합니다. 아래 코드는 실제 구현의 핵심 부분을 발췌한 것으로, 전체 동작은 연결된 원본 파일에서 확인할 수 있습니다.
 
-[`aftr_mode_manager/workflow/path_events.py`](aftr_mode_manager/aftr_mode_manager/workflow/path_events.py)
+### 5-1. 자율주행 — 경로 보간 및 곡선 생성
 
-경로 재생 상태 메시지에서 장애물로 인한 일시적인 차단과 더 이상 자동 복구할 수 없는 종료 실패를 구분하는 함수입니다.
+[`aftr_path_manager/aftr_path_manager/bidirectional_corner_fillet.py`](aftr_path_manager/aftr_path_manager/bidirectional_corner_fillet.py)
+
+기록 경로의 급격한 방향 전환 구간에 5차 Bézier 기반 전이 곡선을 생성합니다. 제어점을 이용해 곡선을 일정 간격으로 샘플링하여 정방향과 복귀 방향에서 활용할 경로를 구성합니다.
 
 ```python
-def is_terminal_path_failure_event(event) -> bool:
-    normalized = str(event).strip().lower()
-    return (
-        normalized == "goal_rejected"
-        or normalized.startswith("aborted_status_")
-        or normalized.startswith("failed:")
-        or (
-            normalized.startswith("blocked:")
-            and "retry limit" in normalized
-        )
+# _quintic_transition_samples() 내부: 5차 Bezier 가중치
+sample_count = max(2, int(math.ceil(max(length_m, step_m) / step_m)))
+segment_samples = []
+for index in range(sample_count + 1):
+    t = index / sample_count
+    one_minus_t = 1.0 - t
+    weights = (
+        one_minus_t**5,
+        5.0 * one_minus_t**4 * t,
+        10.0 * one_minus_t**3 * t**2,
+        10.0 * one_minus_t**2 * t**3,
+        5.0 * one_minus_t * t**4,
+        t**5,
     )
 ```
 
-이 판정 결과는 Mode Manager의 경로 재생 상태 처리에 사용됩니다. 자세한 상태 전이와 안전 정책은 [시스템 구조](docs/architecture.md), [안전 정책](docs/safety.md)을 참고하세요.
+곡선 생성 시 진입·이탈 방향과 곡률 연결 조건 등을 함께 고려합니다. 위 코드는 샘플링 부분만 발췌했습니다.
 
-### 5-2. 모터 통신 패킷 생성
+### 5-2. Human Tracking — 작업자 탐지 및 추적 대상 확정
 
-[`aftr_hardware/src/md_packet.cpp`](aftr_hardware/src/md_packet.cpp)
+[`aftr_tracking/aftr_tracking/tracker_node.py`](aftr_tracking/aftr_tracking/tracker_node.py)
 
-MD400T Driver에 전달하는 패킷은 헤더, 장치 ID, 명령 ID, 데이터 길이, 데이터 및 체크섬으로 구성됩니다.
+LiDAR scan에서 검출한 작업자 후보 중 거리 조건을 충족하는 대상을 선택합니다. 일정 프레임 동안 후보가 관찰되면 추적 대상을 확정하고 `FOLLOW` 상태로 전환합니다.
+
+```python
+def search_target(self, humans):
+    """Lock the nearest candidate after the required confirmation frames."""
+    valid_candidates = [
+        h
+        for h in humans
+        if 0.3 <= math.hypot(h[0], h[1]) <= self.detection_dist_limit
+    ]
+
+    if not valid_candidates:
+        self.candidate_count = 0
+        return None
+
+    current_nearest = min(valid_candidates, key=lambda h: math.hypot(h[0], h[1]))
+    self.candidate_count += 1
+
+    if self.candidate_count >= self.required_frames:
+        self.locked_target = current_nearest
+        self.lost_frames = 0
+        self.candidate_count = 0
+        self.mode = "FOLLOW"
+        return self.locked_target
+```
+
+추적 중에는 이전 대상과의 위치 차이, 일시적 미검출 및 장애물 여부를 고려해 추적 상태와 이동 명령을 관리합니다.
+
+### 5-3. Motor Driver — BLDC 모터 속도 명령
+
+[`aftr_hardware/src/md_driver.cpp`](aftr_hardware/src/md_driver.cpp)
+
+`ros2_control` 하드웨어 인터페이스와 연결된 MD400T Driver에 좌·우 In-Wheel Motor의 RPM 명령을 전송합니다. 아래 함수는 토크 상태에 따른 Enable 값과 모터별 RPM을 PID207 데이터 형식으로 구성합니다.
 
 ```cpp
-std::vector<uint8_t> MDPacket::createPacket(
-    PID pid, const std::vector<uint8_t>& data)
+void MDDriver::setVelocity(int32_t rpm_left, int32_t rpm_right)
 {
-  std::vector<uint8_t> packet;
-  packet.emplace_back(HEADER_RMID);
-  packet.emplace_back(HEADER_TMID);
-  packet.emplace_back(DRIVER_ID);
-  packet.emplace_back(static_cast<uint8_t>(pid));
-  packet.emplace_back(static_cast<uint8_t>(data.size()));
-  packet.insert(packet.end(), data.begin(), data.end());
-  packet.emplace_back(calcCheckSum(packet));
-  return packet;
+  // PID207: [Enable1][RPM1_L][RPM1_H][Enable2][RPM2_L][RPM2_H][ReqPID]
+  std::vector<uint8_t> data;
+  uint8_t enable = is_torque_on_ ? 1 : 0;
+
+  data.emplace_back(enable);
+  data.emplace_back(rpm_left & 0xFF);
+  data.emplace_back((rpm_left >> 8) & 0xFF);
+
+  data.emplace_back(enable);
+  data.emplace_back(rpm_right & 0xFF);
+  data.emplace_back((rpm_right >> 8) & 0xFF);
+
+  data.emplace_back(2);
+  sendPacket(PID::VEL_CMD, data);
 }
 ```
 
-패킷 형식 및 Checksum의 상세 내용은 [하드웨어 참고 문서](aftr_hardware/docs/md_packet_protocol.md)를 참고하세요.
+패킷 헤더, Checksum 생성과 응답 데이터 처리는 [`md_packet.cpp`](aftr_hardware/src/md_packet.cpp)에 구현되어 있습니다. 세부 통신 규약은 [하드웨어 참고 문서](aftr_hardware/docs/md_packet_protocol.md)를 참고하세요.
 
 ---
 
