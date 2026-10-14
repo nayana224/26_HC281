@@ -231,9 +231,8 @@ cd ~/ros2_ws/src
 git clone https://github.com/nayana224/26_HC281.git autonomous-following-towing-robot
 git clone https://github.com/roverrobotics-forks/serial-ros2.git
 git clone https://github.com/Slamtec/sllidar_ros2.git
+git clone --branch ros2 https://github.com/ros-perception/laser_filters.git
 ```
-
-`laser_filters` 패키지도 같은 `src/`에 설치해야 합니다. 설치에 사용할 저장소와 버전은 프로젝트 운영 환경에 맞게 준비하세요.
 
 **Laptop (amd64 / CPU)** — 저장소 디렉터리에서:
 

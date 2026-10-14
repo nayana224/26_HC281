@@ -13,11 +13,10 @@ cd ~/ros2_ws/src
 git clone https://github.com/nayana224/26_HC281.git autonomous-following-towing-robot
 git clone https://github.com/roverrobotics-forks/serial-ros2.git
 git clone https://github.com/Slamtec/sllidar_ros2.git
+git clone --branch ros2 https://github.com/ros-perception/laser_filters.git
 ```
 
-추가로 `laser_filters` 패키지를 같은 `~/ros2_ws/src` 아래에 설치해야 합니다.
-
-외부 저장소는 AFTR repository와 별도로 관리됩니다. 실제 로봇 배포에는 프로젝트에서 검증한 호환 revision을 사용하는 것을 권장합니다.
+외부 ROS 패키지는 같은 Workspace의 `src/` 아래에 배치합니다.
 
 최종 Workspace 예시는 다음과 같습니다.
 
