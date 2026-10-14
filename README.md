@@ -17,6 +17,10 @@ LiDAR 기반 추종, SLAM, Nav2, BLDC 구동계, 낙상 감지 및 Operator GUI�
   <img src="images/robot_prototype.png" alt="Autonomous Following and Towing Robot" width="900">
 </p>
 
+<p align="center">
+  <img src="images/outline.png" alt="작업자 추종, 경로 저장, 반복 자율주행으로 구성된 프로젝트 핵심 개념" width="950">
+</p>
+
 ## 주요 기능 한눈에 보기
 
 | 기능 | 설명 |
@@ -40,7 +44,8 @@ LiDAR 기반 추종, SLAM, Nav2, BLDC 구동계, 낙상 감지 및 Operator GUI�
 | 항목 | 내용 |
 | --- | --- |
 | 프로젝트 | Autonomous Following and Towing Robot |
-| 프로그램 | 한이음 드림업 |\n| 저장소 브랜치 | `devel` (본 문서 기준) |
+| 프로그램 | 한이음 드림업 |
+| 저장소 브랜치 | `devel` (본 문서 기준) |
 | 플랫폼 | ROS 2 Humble |
 | 배포 대상 | NVIDIA Jetson Orin Nano |
 | 개발 환경 | Linux amd64 Laptop / Jetson arm64 + Docker |
