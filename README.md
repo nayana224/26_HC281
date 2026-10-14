@@ -70,10 +70,10 @@
 
 | 구분 | 역할 | 담당 영역 |
 | --- | --- | --- |
-| 멘티 1 | Firmware 및 System Integration | `aftr_audio`, `aftr_bringup`, `aftr_description`, `aftr_gui`, `aftr_hardware`, `aftr_mode_manager`, `aftr_navigation`, `aftr_slam`, `aftr_teleop` |
-| 멘티 2 | Path Planning 및 Autonomous Navigation Support | `aftr_path_manager`, `aftr_status_led` |
-| 멘티 3 | Mechanical Design | 기구부 설계 및 CAD |
-| 멘티 4 (팀장) | Leg Tracking 및 Fall Detection | `aftr_tracking`, `aftr_fall_detection` |
+| 팀장 | Leg Tracking 및 Fall Detection | `aftr_tracking`, `aftr_fall_detection` |
+| 팀원1 | Path Planning 및 Autonomous Navigation Support | `aftr_path_manager`, `aftr_status_led` |
+| 팀원2 | Firmware 및 System Integration | `aftr_audio`, `aftr_bringup`, `aftr_description`, `aftr_gui`, `aftr_hardware`, `aftr_mode_manager`, `aftr_navigation`, `aftr_slam`, `aftr_teleop` |
+| 팀원3 | Mechanical Design | 기구부 설계 및 CAD |
 
 ---
 
@@ -228,7 +228,7 @@ void MDDriver::setVelocity(int32_t rpm_left, int32_t rpm_right)
 mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws/src
 
-git clone --branch devel https://github.com/nayana224/26_HC281.git autonomous-following-towing-robot
+git clone https://github.com/nayana224/26_HC281.git autonomous-following-towing-robot
 git clone https://github.com/roverrobotics-forks/serial-ros2.git
 git clone https://github.com/Slamtec/sllidar_ros2.git
 ```

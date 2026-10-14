@@ -9,4 +9,4 @@
 | `hardware/mdrobot_rs485_rs232_protocol.pdf` | Motor controller 통신 규약 확인 |
 | `presentations/종합설계1 3차발표 - 메카뚜까.pdf` | 이전 발표 자료 보존 |
 
-자료의 이름과 원본 파일은 그대로 유지합니다. 대회 제출 양식이나 평가 기준은 별도 공식 공고를 확인해야 하며, 이 저장소의 README를 공식 제출 문서로 간주하지 않습니다.
+자료의 이름과 원본 파일은 그대로 유지합니다.

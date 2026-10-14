@@ -10,7 +10,7 @@
 mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws/src
 
-git clone https://github.com/nayana224/autonomous-following-towing-robot.git
+git clone https://github.com/nayana224/26_HC281.git autonomous-following-towing-robot
 git clone https://github.com/roverrobotics-forks/serial-ros2.git
 git clone https://github.com/Slamtec/sllidar_ros2.git
 ```
