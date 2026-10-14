@@ -1,17 +1,15 @@
 # Autonomous Following and Towing Robot (AFTR)
 
-> **작업자 추종부터 경로 기록·재생까지, ROS 2 기반 자율주행·견인 로봇 통합 프로젝트**
+> **작업자 추종, 경로 기록 및 자율주행을 통합한 ROS 2 기반 견인 로봇**
 
 ![ROS 2](https://img.shields.io/badge/ROS_2-Humble-22314E?logo=ros&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platform-Jetson_Orin_Nano-76B900)
 ![Docker](https://img.shields.io/badge/Environment-Docker-2496ED?logo=docker&logoColor=white)
 ![Status](https://img.shields.io/badge/Branch-devel-orange)
 
-**AFTR(Autonomous Following and Towing Robot)**는 작업자를 추종하며 이동 경로와 지도를 기록하고, 저장된 정보를 활용해 자율주행 및 복귀 주행을 수행하는 ROS 2 Humble 기반 로봇 프로젝트입니다.
+**AFTR(Autonomous Following and Towing Robot)**은 LiDAR 기반으로 작업자를 추종하며 이동 경로를 기록하고, SLAM으로 생성한 지도와 저장 경로를 활용해 자율주행 및 복귀 주행을 수행하는 ROS 2 Humble 기반 이동형 견인 로봇 프로젝트입니다.
 
-LiDAR 기반 추종, SLAM, Nav2, BLDC 구동계, 낙상 감지 및 Operator GUI를 하나의 운용 흐름으로 통합하는 것을 목표로 합니다.
-
-**현재 문서는 `devel` 브랜치 기준입니다.** 실제 로봇 운용에는 하드웨어 연결과 환경별 설정이 필요하며, 모든 장비 구성에서 동작이 검증된 범용 배포판을 의미하지 않습니다.
+**이 문서는 `devel` 브랜치를 기준으로 작성되었습니다.** 실제 로봇 운용에는 지정된 하드웨어와 환경별 설정이 필요합니다.
 
 <p align="center">
   <img src="images/robot_prototype.png" alt="Autonomous Following and Towing Robot" width="900">
@@ -21,23 +19,17 @@ LiDAR 기반 추종, SLAM, Nav2, BLDC 구동계, 낙상 감지 및 Operator GUI�
   <img src="images/outline.png" alt="작업자 추종, 경로 저장, 반복 자율주행으로 구성된 프로젝트 핵심 개념" width="950">
 </p>
 
-## 주요 기능 한눈에 보기
+## 주요 기능
 
 | 기능 | 설명 |
 | --- | --- |
-| **작업자 추종** | LiDAR 정보를 이용한 추종 주행 |
-| **경로 기록·재생** | 추종 중 경로 저장, 정방향 및 복귀 경로 운용 |
-| **Mapping & Localization** | SLAM Toolbox 기반 지도 작성 및 위치 추정 |
-| **Autonomous Navigation** | Nav2 기반 경로 주행 |
-| **Safety Monitoring** | 낙상 감지, 상태 감시 및 안전 정지 흐름 |
-| **Operator Interface** | GUI, Audio 및 Status LED를 통한 상태 확인과 운용 |
-| **Deployment** | Laptop 개발용 CPU / Jetson 배포용 컨테이너 분리 |
-
-## 프로젝트 개요
-
-작업자를 추종하면서 이동 경로와 지도를 기록하고, 저장된 데이터를 기반으로 위치 추정 및 경로 재현을 수행합니다. Operator GUI를 통해 추종·경로 저장·자율주행을 제어하며 LiDAR, RealSense, BLDC 구동계와 안전 모니터링 기능을 함께 제공합니다.
-
-전체 동작은 **작업자 추종 및 경로 기록 → 저장 데이터 확인 → 위치 추정 → 경로 재현** 단계로 구성됩니다. 운용 모드와 안전 상태 전환은 관련 ROS 패키지를 통해 관리합니다.
+| **작업자 추종** | LiDAR 기반 작업자 인식 및 추종 주행 |
+| **경로 기록·재생** | 추종 중 경로·지도 기록 및 정방향·복귀 주행 |
+| **지도 작성 및 위치 추정** | SLAM Toolbox를 이용한 지도 작성과 AMCL 기반 위치 추정 |
+| **자율주행** | Nav2 기반 저장 경로 주행 |
+| **안전 상태 모니터링** | 낙상 감지, 연결 상태 감시 및 안전 정지 |
+| **운영자 인터페이스** | GUI, 안내음 및 상태 LED를 통한 제어·상태 확인 |
+| **배포 환경** | Laptop(CPU)과 Jetson(CUDA) Docker 환경 분리 |
 
 ## 프로젝트 정보
 
@@ -69,24 +61,24 @@ LiDAR 기반 추종, SLAM, Nav2, BLDC 구동계, 낙상 감지 및 Operator GUI�
   <img src="images/operation_workflow.png" alt="운용 흐름" width="1200">
 </p>
 
-1. **초기 설정**: 통신, 센서, 카메라 상태 확인
-2. **작업자 추종 및 경로 저장**: LiDAR 기반 추종과 경로·지도 기록
-3. **경로 재현 및 자율주행**: 저장 데이터 기반 Localization 및 Nav2 경로 재생
+1. **초기 설정**: 통신 상태와 센서·구동계 연결을 확인하고 운용 모드 선택
+2. **작업자 추종 및 경로 기록**: LiDAR 기반으로 작업자를 추종하며 이동 경로와 지도를 기록
+3. **경로 재현 및 자율주행**: 저장된 지도·경로로 위치를 추정하고 Nav2 기반으로 정방향·복귀 주행
 
 자세한 운용 순서는 [운용 안내](docs/operation.md)를 참고하세요.
 
-## Operator GUI
+## 운영자 GUI (Operator GUI)
 
 <p align="center">
   <img src="images/operator_gui.png" alt="Operator GUI" width="1200">
 </p>
 
-- 추종 / 자율주행 모드 선택
+- 추종 및 자율주행 모드 선택
 - 경로 저장 설정
-- 로봇 상태와 속도 표시
+- 로봇 운용 상태와 속도 표시
 - 저장 경로 기반 정방향·복귀 주행
 - 지도 및 현재 위치 모니터링
-- 운행 중단 및 안전 복귀
+- 운행 중단 및 안전 상태 확인
 
 ## 기구 설계
 
@@ -94,20 +86,13 @@ LiDAR 기반 추종, SLAM, Nav2, BLDC 구동계, 낙상 감지 및 Operator GUI�
   <img src="images/robot_components.png" alt="로봇 구성 요소" width="850">
 </p>
 
+<p align="center"><sub>조절식 디스플레이 거치대, 상태 표시 LED 및 견인 연결부를 포함한 로봇 기구 설계</sub></p>
+
 <p align="center">
   <img src="images/steering_latch_mechanism.png" alt="견인 연결 구조" width="850">
 </p>
 
-## 주요 기능
-
-- 작업자 추종 및 경로 기록
-- 저장 경로 재생
-- SLAM Toolbox 기반 Mapping
-- Nav2 기반 Localization 및 Navigation
-- 낙상 감지 및 Safety Stop
-- Operator GUI / Audio / Status LED
-- ros2_control 기반 BLDC Motor 제어
-- Laptop / Jetson Docker 환경 분리
+<p align="center"><sub>작업 카트와 로봇의 기계적 결합을 위한 연결부 구조</sub></p>
 
 ## 빠른 시작
 
@@ -133,7 +118,7 @@ git clone https://github.com/Slamtec/sllidar_ros2.git
 cd autonomous-following-towing-robot
 ```
 
-이 프로젝트는 같은 `~/ros2_ws/src` 아래에 `laser_filters`도 함께 있어야 합니다. `laser_filters`는 프로젝트에서 사용할 fork가 정리되면 해당 저장소 URL을 이 문서에 추가할 예정입니다.
+`laser_filters`도 같은 `~/ros2_ws/src` 아래에 별도로 준비해야 합니다. 프로젝트용 fork와 검증된 revision은 추후 문서에 반영할 예정입니다.
 
 ### Laptop 개발 환경 (amd64 / CPU)
 
@@ -174,8 +159,6 @@ source /workspace/install_jetson/setup.bash
 
 전체 설치 조건, 모델·데이터 경로, 장치 연결 및 실제 운용 절차는 [설치 및 실행](docs/setup.md)과 [운용 안내](docs/operation.md)를 참고하세요.
 
-> **참고:** `laser_filters`는 Workspace에 별도로 준비해야 합니다. 프로젝트에서 검증한 fork 및 revision이 확정되기 전까지는 호환성을 확인하고 사용하세요.
-
 ## Workspace 구성
 
 ```text
@@ -213,13 +196,6 @@ source /workspace/install_jetson/setup.bash
 | `aftr_teleop` | 수동 `/cmd_vel` 입력 |
 | `aftr_tracking` | 작업자 추종 |
 
-## 개발 및 배포 관련 안내
-
-- 본 저장소는 **13개 `aftr_*` ROS 패키지**로 구성되며, 외부 의존 패키지는 별도 clone이 필요합니다.
-- ROS 인터페이스, 토픽 및 서비스 구성은 [ROS 인터페이스 문서](docs/interfaces.md)를 기준으로 확인하세요.
-- 안전 로직과 복구 조건은 [안전 정책](docs/safety.md)에 정리되어 있습니다.
-- 진단, 코드 빌드 및 유지보수 명령은 [개발 및 유지보수 문서](docs/maintenance.md)로 분리했습니다.
-
 ## Team
 
 | 이름 | 담당 분야 | 담당 영역 |
@@ -238,7 +214,3 @@ source /workspace/install_jetson/setup.bash
 - [안전 정책](docs/safety.md)
 - [개발 및 유지보수](docs/maintenance.md)
 - [하드웨어 및 발표 참고 자료](docs/references/README.md)
-
-## 안내
-
-프로젝트 관련 설정이나 실행 과정에 문제가 발생하면 사용 환경(Laptop/Jetson), 실행 명령, ROS 로그와 재현 순서를 함께 기록해 주세요. 하드웨어 변경 시 설정 파일과 안전 동작을 재검증해야 합니다.
