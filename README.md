@@ -5,9 +5,6 @@
 ![ROS 2](https://img.shields.io/badge/ROS_2-Humble-22314E?logo=ros&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platform-Jetson_Orin_Nano-76B900)
 ![Docker](https://img.shields.io/badge/Environment-Docker-2496ED?logo=docker&logoColor=white)
-![Branch](https://img.shields.io/badge/Branch-devel-orange)
-
-**2026 한이음 드림업 README 작성 가이드**의 5개 필수 항목(프로젝트 개요, 팀원 소개, 시스템 구성도, 작품 소개영상, 핵심 소스코드)에 맞춰 작성했습니다. 현재 내용은 `devel` 브랜치 기준입니다.
 
 ---
 
@@ -69,8 +66,6 @@
 ---
 
 ## 2. 팀원 소개
-
-공식 템플릿의 **이름 미기재** 원칙에 따라 역할을 중심으로 소개합니다. 기존 실명 및 담당 영역 기록은 [팀 구성 문서](docs/team.md)에 보존했습니다.
 
 | 구분 | 역할 | 담당 영역 |
 | --- | --- | --- |
@@ -191,7 +186,7 @@ std::vector<uint8_t> MDPacket::createPacket(
 mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws/src
 
-git clone --branch devel https://github.com/nayana224/autonomous-following-towing-robot.git
+git clone --branch devel https://github.com/nayana224/26_HC281.git autonomous-following-towing-robot
 git clone https://github.com/roverrobotics-forks/serial-ros2.git
 git clone https://github.com/Slamtec/sllidar_ros2.git
 ```
