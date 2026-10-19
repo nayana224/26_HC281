@@ -57,7 +57,7 @@ BLDC In-Wheel Motors
 
 ### Wide-Turn 및 경로 재주행
 
-지도 코너와 회전각을 분석해 Wide-Turn 구간을 검출하고, Bézier 곡선 기반 외측 선회 궤적과 충돌 검사를 적용합니다. 보정 waypoint를 ROS 2 Path로 변환하여 정방향 및 복귀 주행에 사용합니다.
+지도 코너와 회전각을 분석해 Wide-Turn 구간을 검출하고, **3차 Bézier 곡선** 기반 외측 선회 궤적과 충돌 검사를 적용합니다. 실제 저장 경로 재주행은 안전 경로 생성 후 `map_corner_turn_path_csv_generator_node.py`에서 방향별 Wide-Turn 경로를 생성하는 순서로 수행합니다. 보정 waypoint를 ROS 2 Path로 변환하여 정방향 및 복귀 주행에 사용합니다.
 
 ### 모터 구동 및 견인 구조
 
