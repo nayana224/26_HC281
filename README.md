@@ -134,30 +134,23 @@ GUI에서 모드 선택, 경로 저장 설정, 주행 명령, 로봇 상태 및 
 
 프로젝트의 핵심 기술은 **자율주행 경로 보간**, **Human Tracking**, **Motor Driver 제어**로 구성됩니다.
 
-### 5-1. 자율주행 — 경로 보간 및 곡선 생성
+### 5-1. 자율주행 — 경로 보정 및 3차 Bézier Wide-Turn
 
-[`aftr_path_manager/aftr_path_manager/bidirectional_corner_fillet.py`](aftr_path_manager/aftr_path_manager/bidirectional_corner_fillet.py)
+[`aftr_path_manager/aftr_path_manager/map_corner_turn_path_csv_generator_node.py`](aftr_path_manager/aftr_path_manager/map_corner_turn_path_csv_generator_node.py)
 
-저장 경로의 급격한 방향 전환 구간을 부드럽게 연결하는 경로 보간 기능입니다. 5차 Bézier 전이 곡선의 제어점 가중치를 계산하여 곡선을 일정 간격으로 생성하며, 안전 경로 보정 및 Wide-Turn 처리와 함께 경로 재주행에 활용합니다.
+저장된 waypoint를 재주행할 때 안전 경로 생성기를 먼저 실행하고, 지도 코너와 주행 방향을 고려한 Wide-Turn 경로를 생성합니다. 코너의 진입, 선회, 복귀 구간은 **3차 Bézier 곡선**으로 연결합니다. 각 곡선은 네 제어점 `P0`~`P3`를 사용합니다.
 
 ```python
-# _quintic_transition_samples() 내부: 5차 Bezier 가중치
-sample_count = max(2, int(math.ceil(max(length_m, step_m) / step_m)))
-segment_samples = []
-for index in range(sample_count + 1):
-    t = index / sample_count
-    one_minus_t = 1.0 - t
-    weights = (
-        one_minus_t**5,
-        5.0 * one_minus_t**4 * t,
-        10.0 * one_minus_t**3 * t**2,
-        10.0 * one_minus_t**2 * t**3,
-        5.0 * one_minus_t * t**4,
-        t**5,
-    )
+# 3차 Bézier 곡선의 기본 형태
+B = (
+    (1 - t)**3 * P0
+    + 3 * (1 - t)**2 * t * P1
+    + 3 * (1 - t) * t**2 * P2
+    + t**3 * P3
+)
 ```
 
-안전 경로 생성에서는 점유 격자 지도와 Distance Transform으로 장애물 이격거리를 평가하고, 코너 구간에는 외측 선회 궤적과 충돌 검사를 적용합니다.
+실제 구현은 `cubic_bezier()`와 `sample_cubic_bezier_by_control_polygon()`을 참조하세요. 경로 저장·실행 순서는 [`path_manager_node.py`](aftr_path_manager/aftr_path_manager/path_manager_node.py)의 `start_saved_path_following()`에서 확인할 수 있습니다.
 
 ### 5-2. Human Tracking — 작업자 탐지 및 추적 대상 확정
 

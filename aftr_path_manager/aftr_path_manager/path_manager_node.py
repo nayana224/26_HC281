@@ -30,9 +30,6 @@ from tf2_ros import Buffer
 from tf2_ros import TransformException
 from tf2_ros import TransformListener
 
-from aftr_path_manager.bidirectional_corner_fillet import (
-    apply_bidirectional_corner_fillets,
-)
 from aftr_path_manager.follow_runtime import build_remaining_follow_poses
 from aftr_path_manager.follow_runtime import compute_retry_delay_seconds
 from aftr_path_manager.follow_runtime import estimate_remaining_follow_distance
@@ -306,42 +303,6 @@ class PathManagerNode(Node):
             "follow_path_corner_max_deviation_m",
             0.20,
         ).value
-        self.follow_path_bidirectional_corner_enabled = self.declare_parameter(
-            "follow_path_bidirectional_corner_enabled",
-            True,
-        ).value
-        self.follow_path_bidirectional_corner_heading_deg = self.declare_parameter(
-            "follow_path_bidirectional_corner_heading_deg",
-            20.0,
-        ).value
-        self.follow_path_bidirectional_corner_radius_m = self.declare_parameter(
-            "follow_path_bidirectional_corner_radius_m",
-            1.80,
-        ).value
-        self.follow_path_bidirectional_corner_max_deviation_m = (
-            self.declare_parameter(
-                "follow_path_bidirectional_corner_max_deviation_m",
-                0.55,
-            ).value
-        )
-        self.follow_path_bidirectional_corner_resample_step_m = (
-            self.declare_parameter(
-                "follow_path_bidirectional_corner_resample_step_m",
-                0.05,
-            ).value
-        )
-        self.follow_path_bidirectional_corner_minimum_radius_m = (
-            self.declare_parameter(
-                "follow_path_bidirectional_corner_minimum_radius_m",
-                0.80,
-            ).value
-        )
-        self.follow_path_bidirectional_corner_outward_overshoot_m = (
-            self.declare_parameter(
-                "follow_path_bidirectional_corner_outward_overshoot_m",
-                0.0,
-            ).value
-        )
         self.auto_start = self.declare_parameter("auto_start", False).value
 
     def _initialize_runtime_state(self):
@@ -1423,89 +1384,6 @@ class PathManagerNode(Node):
                 )
 
         return dense_poses
-
-    def preprocess_follow_path_for_replay(self, poses, apply_corner_fillets=True):
-        """Apply replay-time cleanup before sending a path to Nav2."""
-        input_pose_count = len(poses)
-        prepared_poses = list(poses)
-        prepared_poses = self.cleanup_follow_path_if_needed(prepared_poses)
-        cleanup_pose_count = len(prepared_poses)
-        prepared_poses = self.interpolate_follow_path(prepared_poses)
-        interpolated_pose_count = len(prepared_poses)
-        fillet_summary = None
-        if (
-            apply_corner_fillets
-            and bool(self.follow_path_bidirectional_corner_enabled)
-        ):
-            fillet_grid = self.build_follow_path_cleanup_grid()
-            fillet_clearance_m = float(self.follow_path_safety_clearance_m)
-
-            def fillet_sample_is_safe(sample):
-                """Check a turn sample against the configured map clearance."""
-                if fillet_grid is None:
-                    return True
-                return is_pose_safe(
-                    sample,
-                    fillet_grid,
-                    fillet_clearance_m,
-                )
-
-            fillet_summary = apply_bidirectional_corner_fillets(
-                prepared_poses,
-                target_radius_m=float(
-                    self.follow_path_bidirectional_corner_radius_m
-                ),
-                heading_threshold_rad=math.radians(
-                    float(self.follow_path_bidirectional_corner_heading_deg)
-                ),
-                max_deviation_m=float(
-                    self.follow_path_bidirectional_corner_max_deviation_m
-                ),
-                resample_step_m=float(
-                    self.follow_path_bidirectional_corner_resample_step_m
-                ),
-                minimum_radius_m=float(
-                    self.follow_path_bidirectional_corner_minimum_radius_m
-                ),
-                sample_is_safe=fillet_sample_is_safe,
-                outward_overshoot_m=float(
-                    self.follow_path_bidirectional_corner_outward_overshoot_m
-                ),
-            )
-            prepared_poses = fillet_summary.poses
-            # Do not run point-wise clearance cleanup after curve generation.
-            # Every accepted sample was already checked against the same map
-            # clearance above; moving individual samples now would recreate
-            # curvature spikes at the corner entrance and exit.
-        prepared_poses = self.with_path_direction_yaw(prepared_poses)
-
-        if (
-            cleanup_pose_count != input_pose_count
-            or interpolated_pose_count != cleanup_pose_count
-        ):
-            self.get_logger().info(
-                "follow path replay preprocessing complete "
-                f"(input={input_pose_count}, "
-                f"after_cleanup={cleanup_pose_count}, "
-                f"after_interpolation={interpolated_pose_count})"
-            )
-        if fillet_summary is not None and fillet_summary.detected_corners > 0:
-            applied_radii = ",".join(
-                f"{radius_m:.2f}"
-                for radius_m in fillet_summary.applied_radii_m
-            )
-            self.get_logger().info(
-                "bidirectional corner fillet complete "
-                f"(detected={fillet_summary.detected_corners}, "
-                f"modified={fillet_summary.modified_corners}, "
-                f"minimum_radius={fillet_summary.minimum_applied_radius_m:.2f}m, "
-                f"degraded={fillet_summary.degraded_corners}, "
-                "maximum_curvature_rate="
-                f"{fillet_summary.maximum_curvature_rate_per_m2:.2f}/m2, "
-                f"radii={applied_radii or '-'}m, "
-                f"output={len(prepared_poses)})"
-            )
-        return prepared_poses
 
     def build_follow_path_cleanup_grid(self):
         """Build the occupancy-grid snapshot used by replay-path cleanup."""
