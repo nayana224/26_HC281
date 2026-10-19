@@ -62,25 +62,6 @@ def generate_launch_description():
                 "follow_path_corner_exit_transition_distance_m": 2.40,
                 "follow_path_corner_smoothing_strength": 0.80,
                 "follow_path_corner_max_deviation_m": 0.35,
-                # Replace major turns with a direction-symmetric, zero-endpoint-
-                # curvature transition. Short segments use the best available
-                # smooth radius instead of falling back to the original kink or
-                # rejecting an otherwise traversable saved route.
-                "follow_path_bidirectional_corner_enabled": True,
-                # Ignore small recorded-path heading jitter so it cannot steal
-                # transition distance from the nearby load-bearing cart corner.
-                "follow_path_bidirectional_corner_heading_deg": 25.0,
-                "follow_path_bidirectional_corner_radius_m": 2.40,
-                "follow_path_bidirectional_corner_max_deviation_m": 0.80,
-                "follow_path_bidirectional_corner_resample_step_m": 0.05,
-                # This is a curve-candidate preference, not a route rejection:
-                # prefer an arc of at least 1.50 m and reduce the outside offset
-                # or fall back to the ordinary smooth fillet when space is short.
-                "follow_path_bidirectional_corner_minimum_radius_m": 1.50,
-                # Continue the tangent controls beyond the saved corner so the
-                # robot draws one broad outside arc instead of cutting inside.
-                # The 0.80 m deviation and map-clearance checks still cap it.
-                "follow_path_bidirectional_corner_outward_overshoot_m": 1.00,
             },
         ],
     )
